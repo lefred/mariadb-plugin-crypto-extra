@@ -84,6 +84,26 @@ generated plugin:
 
 ```sql
 INSTALL SONAME 'crypto_extra';
+
+SELECT plugin_name, plugin_type, plugin_library, plugin_description, plugin_author i
+FROM information_schema.PLUGINS WHERE plugin_library LIKE 'crypto_extra.so';
++-------------------+-------------+-----------------+------------------------------+---------------+
+| plugin_name       | plugin_type | plugin_library  | plugin_description           | plugin_author |
++-------------------+-------------+-----------------+------------------------------+---------------+
+| digest            | FUNCTION    | crypto_extra.so | Function DIGEST()            | lefred        |
+| hmac              | FUNCTION    | crypto_extra.so | Function HMAC()              | lefred        |
+| pbkdf2_hmac       | FUNCTION    | crypto_extra.so | Function PBKDF2_HMAC()       | lefred        |
+| gen_random_bytes  | FUNCTION    | crypto_extra.so | Function GEN_RANDOM_BYTES()  | lefred        |
+| random_bytes_hex  | FUNCTION    | crypto_extra.so | Function RANDOM_BYTES_HEX()  | lefred        |
+| argon2id_hash     | FUNCTION    | crypto_extra.so | Function ARGON2ID_HASH()     | lefred        |
+| argon2id_verify   | FUNCTION    | crypto_extra.so | Function ARGON2ID_VERIFY()   | lefred        |
+| crypto_equals     | FUNCTION    | crypto_extra.so | Function CRYPTO_EQUALS()     | lefred        |
+| crypto_encrypt    | FUNCTION    | crypto_extra.so | Function CRYPTO_ENCRYPT()    | lefred        |
+| crypto_decrypt    | FUNCTION    | crypto_extra.so | Function CRYPTO_DECRYPT()    | lefred        |
+| crypto_encrypt_iv | FUNCTION    | crypto_extra.so | Function CRYPTO_ENCRYPT_IV() | lefred        |
+| crypto_decrypt_iv | FUNCTION    | crypto_extra.so | Function CRYPTO_DECRYPT_IV() | lefred        |
++-------------------+-------------+-----------------+------------------------------+---------------+
+12 rows in set (0.002 sec)
 ```
 
 With MariaDB's bundled TLS library the plugin is linked statically and enabled
