@@ -1,0 +1,61 @@
+SELECT HEX(DIGEST('abc', 'sha256'));
+HEX(DIGEST('abc', 'sha256'))
+BA7816BF8F01CFEA414140DE5DAE2223B00361A396177A9CB410FF61F20015AD
+SELECT HEX(DIGEST('abc', 'sha3-256'));
+HEX(DIGEST('abc', 'sha3-256'))
+3A985DA74FE225B2045C172D6BD390BD855F086E3E9D525B46BFE24511431532
+SELECT HEX(HMAC('what do ya want for nothing?', 'Jefe', 'sha256'));
+HEX(HMAC('what do ya want for nothing?', 'Jefe', 'sha256'))
+5BDCC146BF60754E6A042426089575C75A003F089D2739839DEC58B964EC3843
+SELECT HEX(PBKDF2_HMAC('password', 'salt', 1, 32, 'sha256'));
+HEX(PBKDF2_HMAC('password', 'salt', 1, 32, 'sha256'))
+120FB6CFFCF8B32C43E7225256C4F837A86548C92CCC35480805987CB70BE17B
+SELECT LENGTH(GEN_RANDOM_BYTES(32));
+LENGTH(GEN_RANDOM_BYTES(32))
+32
+SELECT LENGTH(RANDOM_BYTES_HEX(32)),
+RANDOM_BYTES_HEX(32) REGEXP '^[0-9A-F]{64}$';
+LENGTH(RANDOM_BYTES_HEX(32))	RANDOM_BYTES_HEX(32) REGEXP '^[0-9A-F]{64}$'
+64	1
+SET @argon2_hash= ARGON2ID_HASH('password', 1024, 1, 1, 16);
+SELECT @argon2_hash LIKE '$argon2id$v=19$m=1024,t=1,p=1$%';
+@argon2_hash LIKE '$argon2id$v=19$m=1024,t=1,p=1$%'
+1
+SELECT ARGON2ID_VERIFY('password', @argon2_hash);
+ARGON2ID_VERIFY('password', @argon2_hash)
+1
+SELECT ARGON2ID_VERIFY('wrong password', @argon2_hash);
+ARGON2ID_VERIFY('wrong password', @argon2_hash)
+0
+SELECT ARGON2ID_VERIFY('password', '$argon2id$invalid');
+ARGON2ID_VERIFY('password', '$argon2id$invalid')
+0
+SELECT CRYPTO_EQUALS(DIGEST('abc', 'sha256'), DIGEST('abc', 'sha256'));
+CRYPTO_EQUALS(DIGEST('abc', 'sha256'), DIGEST('abc', 'sha256'))
+1
+SELECT CRYPTO_EQUALS(DIGEST('abc', 'sha256'), DIGEST('abd', 'sha256'));
+CRYPTO_EQUALS(DIGEST('abc', 'sha256'), DIGEST('abd', 'sha256'))
+0
+SET @key= UNHEX('000102030405060708090A0B0C0D0E0F');
+SET @iv= UNHEX('101112131415161718191A1B1C1D1E1F');
+SET @encrypted= CRYPTO_ENCRYPT_IV('secret', @key, 'aes-128-cbc', @iv);
+SELECT HEX(CRYPTO_DECRYPT_IV(@encrypted, @key, 'aes-128-cbc', @iv));
+HEX(CRYPTO_DECRYPT_IV(@encrypted, @key, 'aes-128-cbc', @iv))
+736563726574
+SET @encrypted= CRYPTO_ENCRYPT_IV(REPEAT('x', 16), @key,
+'aes-128-cbc/pad:none', @iv);
+SELECT LENGTH(@encrypted),
+CRYPTO_DECRYPT_IV(@encrypted, @key, 'aes-128-cbc/pad:none', @iv)
+= REPEAT('x', 16);
+LENGTH(@encrypted)	CRYPTO_DECRYPT_IV(@encrypted, @key, 'aes-128-cbc/pad:none', @iv)
+= REPEAT('x', 16)
+16	1
+SELECT DIGEST(NULL, 'sha256') IS NULL;
+DIGEST(NULL, 'sha256') IS NULL
+1
+SELECT DIGEST('abc', 'no-such-digest') IS NULL;
+DIGEST('abc', 'no-such-digest') IS NULL
+1
+SELECT CRYPTO_ENCRYPT('secret', @key, 'aes-256-gcm') IS NULL;
+CRYPTO_ENCRYPT('secret', @key, 'aes-256-gcm') IS NULL
+1
