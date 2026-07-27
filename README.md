@@ -62,6 +62,52 @@ run `EVP_*Update`/`EVP_*Final` and never manage an authentication tag, so an
 AEAD cipher's tag would silently be dropped on encryption, making the
 ciphertext undecryptable. Use a CBC or ECB-style cipher name instead.
 
+## Comparison with PostgreSQL and MySQL
+
+`crypto_extra`'s function names and argument order deliberately mirror
+PostgreSQL's `pgcrypto`, so most `pgcrypto` SQL ports over by just dropping
+the schema qualification and upper-casing the function name.
+
+| Capability | `crypto_extra` (this plugin) | PostgreSQL `pgcrypto` | MySQL / MariaDB built-in |
+|---|---|---|---|
+| Message digest | `DIGEST(data, algo)` — any OpenSSL digest | `digest(data, type)` | `MD5()`, `SHA1()`, `SHA2()` — fixed algorithm set |
+| HMAC | `HMAC(data, key, algo)` | `hmac(data, key, type)` | not available |
+| PBKDF2 key derivation | `PBKDF2_HMAC(password, salt, iter, len, algo)` | not built in (composed by hand from `hmac()`) | not available |
+| Password hashing | `ARGON2ID_HASH()` / `ARGON2ID_VERIFY()` (Argon2id, memory-hard) | `crypt()` / `gen_salt()` (bcrypt `bf`, `md5`, `des`, `xdes` — no Argon2) | not available |
+| Secure random bytes | `GEN_RANDOM_BYTES()`, `RANDOM_BYTES_HEX()` | `gen_random_bytes()`, `gen_random_uuid()` | `RANDOM_BYTES()` |
+| Constant-time comparison | `CRYPTO_EQUALS()` | not available | not available |
+| Raw symmetric encryption | `CRYPTO_ENCRYPT()`/`CRYPTO_DECRYPT()` (+ `_IV` forms) | `encrypt()`/`decrypt()` (+ `_iv` forms) | `AES_ENCRYPT()`/`AES_DECRYPT()` |
+| OpenPGP-style encryption | not provided | `pgp_sym_encrypt()`/`pgp_pub_encrypt()` etc. | not available |
+
+Notes:
+
+- **Algorithm coverage.** Like `pgcrypto`, `crypto_extra` delegates digest
+  and cipher selection to OpenSSL, so both support anything the linked
+  OpenSSL provider offers (`sha3-256`, `blake2b512`, ...). MySQL/MariaDB's
+  `SHA2()` and `AES_ENCRYPT()` only implement a small, hardcoded set of
+  algorithms and cannot be extended without a server rebuild.
+- **Cipher mode and padding.** MySQL/MariaDB's `AES_ENCRYPT()` historically
+  defaulted to ECB, with mode selected server-wide via
+  `block_encryption_mode`. `crypto_extra` and `pgcrypto` instead encode the
+  mode in the algorithm string per call (e.g. `aes-256-cbc`) and default to
+  CBC, matching `pgcrypto`'s `/pad:pkcs` / `/pad:none` suffix convention.
+  None of the three expose AEAD ciphers through their raw-encryption
+  functions — `crypto_extra` rejects AEAD cipher names outright (see
+  above), and `pgcrypto`'s `encrypt()`/`decrypt()` are documented as
+  supporting only `bf` and `aes` in CBC mode.
+- **Password hashing.** `crypto_extra` is the only one of the three with a
+  modern, memory-hard KDF (Argon2id) intended for password storage.
+  `pgcrypto`'s `crypt()` offers bcrypt, which is CPU-hard but not
+  memory-hard. MySQL/MariaDB have no built-in SQL function for password
+  hashing at all — that's handled by authentication plugins, not by SQL.
+- **Constant-time comparison.** Neither `pgcrypto` nor MySQL/MariaDB expose
+  a constant-time equality function; comparing MACs or tokens with `=`
+  risks a timing side-channel. `CRYPTO_EQUALS()` fills that gap.
+- **OpenPGP.** `pgcrypto` additionally provides `pgp_sym_encrypt()` /
+  `pgp_pub_encrypt()` and their counterparts for OpenPGP-format messages;
+  `crypto_extra` has no equivalent — use `CRYPTO_ENCRYPT()` for raw
+  symmetric encryption instead.
+
 ## Examples
 
 ```sql

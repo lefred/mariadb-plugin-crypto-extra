@@ -30,3 +30,11 @@ Follow-up fixes from a code review of `crypto_extra.cc`.
   `CRYPTO_ENCRYPT`/`CRYPTO_DECRYPT`.
 - **`mysql-test/crypto_extra/basic.test`** / **`basic.result`**: Added a
   test case asserting `CRYPTO_ENCRYPT(..., 'aes-256-gcm')` returns `NULL`.
+
+## 2026-07-27 — claude-sonnet-5 (Claude Code)
+
+- **`README.md`**: Added a "Comparison with PostgreSQL and MySQL" section:
+  a per-function table mapping `crypto_extra` functions to their
+  `pgcrypto` and MySQL/MariaDB built-in equivalents (or lack thereof), plus
+  notes on algorithm coverage, cipher mode/padding conventions, password
+  hashing, constant-time comparison, and OpenPGP support.
