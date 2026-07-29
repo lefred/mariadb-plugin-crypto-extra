@@ -1,0 +1,26 @@
+name: Build and package CRYPTO_EXTRA plugin
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    uses: lefred/mariadb-plugin-ci/.github/workflows/build-plugin.yml@v1
+    with:
+      plugin_name: crypto-extra
+      plugin_directory: crypto_extra
+      build_target: crypto_extra
+      plugin_library: crypto_extra.so
+      cmake_options: -DPLUGIN_VMSTAT=DYNAMIC
+      test_suite: crypto_extra
+      run_tests: ${{ startsWith(github.ref, 'refs/tags/v') }}
