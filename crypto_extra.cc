@@ -834,7 +834,7 @@ public:
 #define CRYPTO_PLUGIN_ITEM(type, sql_name, description)                       \
   { MariaDB_FUNCTION_PLUGIN, type::plugin_descriptor(), sql_name, "lefred",  \
     description, PLUGIN_LICENSE_GPL, nullptr, nullptr, 0x0100, nullptr,      \
-    nullptr, "1.0", MariaDB_PLUGIN_MATURITY_EXPERIMENTAL }
+    nullptr, "0.2.0", MariaDB_PLUGIN_MATURITY_EXPERIMENTAL }
 
 maria_declare_plugin(crypto_extra)
   CRYPTO_PLUGIN_ITEM(Item_func_digest, "digest", "Function DIGEST()"),
