@@ -27,6 +27,7 @@ jobs:
           13.0.2
           13.1.1
 
-      cmake_options: -DPLUGIN_CRYPTO_EXTRA=DYNAMIC
+      extra_packages: libargon2-devel
+      cmake_options: -DPLUGIN_CRYPTO_EXTRA=DYNAMIC -DWITH_SSL=system
       test_suite: crypto_extra
       run_tests: false
