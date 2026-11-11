@@ -15,14 +15,13 @@ permissions:
 
 jobs:
   build:
-    uses: lefred/mariadb-plugin-ci/.github/workflows/build-plugin.yml@main
+    uses: lefred/mariadb-plugin-ci/.github/workflows/build-plugin.yml@v1
     with:
       plugin_name: crypto-extra
       plugin_directory: crypto_extra
       build_target: crypto_extra
       plugin_library: crypto_extra.so
 
-      sdk_image: quay.io/lefred14/mariadb-plugin-build
       mariadb_versions: |
           13.0.2
           13.1.1
